@@ -2,27 +2,32 @@
 * @Author: Reinaldo Antonio Camargo Rauch
 * @Date:   2014-10-08 19:25:07
 * @Last Modified by:   Reinaldo Antonio Camargo Rauch
-* @Last Modified time: 2014-10-08 19:47:52
+* @Last Modified time: 2014-10-08 20:19:08
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define TAM 10
+
+#define SEARCHES 10000000
 
 #define EMPTY -1
 
 
 struct node {
     int val;
-    struct no *next;
+    struct node *next;
 };
 
-typedef struct no t_node;
+typedef struct node t_node;
 
 /**
  * Array global
  */
 t_node *array[TAM];
+
+int comp = 0;
 
 /**
  * Reseta o vetor
@@ -32,17 +37,15 @@ void reset() {
 
     for (i = 0; i < TAM; i++)
         array[i] = NULL;
-}
 
+}
 /**
  * Gera o valor hash de um valor
  * @param  val Valor a ser inserido/buscado
  * @return     chave no vetor
  */
 int hash(int val) {
-
     return val % TAM;
-
 }
 
 /**
@@ -65,19 +68,19 @@ t_node *createNode(int val) {
  */
 void insert(int val) {
 
-    int hash = hash(val);
+    int pHash = hash(val);
 
-    t_node *here = array[hash],
+    t_node *here = array[pHash],
         *before = NULL,
         *newItem = createNode(val);
 
     while(here != NULL) {
         before = here;
-        here = here->prox;
+        here = here->next;
     }
 
     if(before == NULL)
-        array[hash] = newItem;
+        array[pHash] = newItem;
     else
         before->next = newItem;
 
@@ -90,19 +93,23 @@ void insert(int val) {
  */
 int search(int val) {
 
-    int hash = hash(val), count = 0;
+    int pHash = hash(val);
 
-    if(array[hash] == val)
-        return hash;
-    else {
-        while(array[hash = reHash(hash)] != val && (count++ < TAM || array[hash] != EMPTY));
+    t_node *here = array[pHash],
+        *before = NULL;
 
-        if(count == TAM - 1 || array[hash] == TAM) {
-            puts("Achou");
-            return hash;
+    while(here != NULL) {
+        comp++;
+        if(here->val == val) {
+            // puts("Achou");
+            return;
+        } else {
+            before = here;
+            here = here->next;
         }
-
     }
+
+    // puts("Não achou");
 
 }
 
@@ -114,15 +121,23 @@ int main() {
 
     int i;
 
+    puts("Reseting array");
+
     reset();
 
-    srand(time());
+    srand(time(NULL));
+
+    puts("Inserting in array");
 
     for(i = 0; i < 5; i++)
         insert(rand());
 
+    puts("Running searches");
 
-
+   for (i = 0; i < SEARCHES; i++)
+        search(rand());
+    printf("Comparações %d\n", comp);
+    printf("Média de comparações: %10.10f\n", (double) comp / (double) SEARCHES);
 
     return 0;
 }
